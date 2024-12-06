@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY_NAME: ghcr.io
-  IMAGE_NAME: BBMRI-ERIC/cbioportal
+  IMAGE_NAME: bbmri-eric/cbioportal
   DOCKER_FILE: docker/web-and-data/Dockerfile
 
 permissions:

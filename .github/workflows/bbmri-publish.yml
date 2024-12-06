@@ -6,7 +6,7 @@ on:
       - 'feat/authorization'
 
 env:
-  TAG_NAME: ${{ github.event.release.tag_name || github.ref_name }}
+  TAG_NAME: ${{ github.sha.slice(0, 7) }}
   REGISTRY_NAME: ghcr.io
   IMAGE_NAME: BBMRI-ERIC/cbioportal
   DOCKER_FILE: docker/web-and-data/Dockerfile

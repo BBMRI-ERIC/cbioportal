@@ -1,15 +1,12 @@
-name: Publish and Build Docker Image
+name: BBMRI Publish and Build Docker Image
 
 on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Build from feat/authorization while PR are not accepted.'
-        default: 'feat/authorization'
-        required: false
+  push:
+    branches:
+      - 'feat/authorization'
 
 env:
-  TAG_NAME: ${{ github.event.inputs.TAG_NAME || github.event.release.tag_name }}
+  TAG_NAME: ${{ github.event.release.tag_name || github.ref_name }}
   REGISTRY_NAME: ghcr.io
   IMAGE_NAME: BBMRI-ERIC/cbioportal
   DOCKER_FILE: docker/web-and-data/Dockerfile

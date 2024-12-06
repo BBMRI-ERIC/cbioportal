@@ -28,7 +28,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package org.cbioportal.security.token.oauth2;
 
@@ -62,7 +62,7 @@ public class OAuth2TokenRefreshRestTemplate {
     private String accessTokenUri;
 
     private final RestTemplate template;
-    
+
     @Autowired
     public OAuth2TokenRefreshRestTemplate(RestTemplate template) {
         this.template = template;
@@ -87,7 +87,7 @@ public class OAuth2TokenRefreshRestTemplate {
             logger.debug("Received access token from authentication server:\n{}",accessToken);
             return accessToken;
         } catch (Exception e) {
-            logger.error("Authentication server did not return an access token. Server response:\n{}",response);
+            logger.error("Authentication server did not return an access token. Server response:\n{}", response, e);
             throw new BadCredentialsException("Authentication server did not return an access token.");
         }
 

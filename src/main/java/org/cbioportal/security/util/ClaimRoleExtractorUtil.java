@@ -14,7 +14,7 @@ import java.util.stream.StreamSupport;
 
 public class ClaimRoleExtractorUtil {
     private static final Logger log = LoggerFactory.getLogger(ClaimRoleExtractorUtil.class);
-    
+
     public static Collection<String> extractClientRoles(final Map<String, Object> claims, final String jwtRolesPath) {
         try {
             // Convert the map to a JSON string
@@ -26,7 +26,7 @@ public class ClaimRoleExtractorUtil {
         } catch (Exception e) {
             log.error("Error extracting claims as a json string");
         }
-        return Collections.emptyList(); 
+        return Collections.emptyList();
     }
 
     public static Collection<String> extractClientRoles(final String claims, final String jwtRolesPath) {
@@ -38,10 +38,10 @@ public class ClaimRoleExtractorUtil {
         }
         return Collections.emptyList();
     }
-    
+
     public static Collection<String> extractClientRoles(final JsonNode claims, final String jwtRolesPath) {
         try {
-            
+
             JsonNode rolesCursor = claims;
             for (var keyName : jwtRolesPath.split("::")) {
                 if (rolesCursor.has(keyName)) {
@@ -49,16 +49,13 @@ public class ClaimRoleExtractorUtil {
                 } else {
                     throw new BadCredentialsException("Cannot Find user Roles in JWT Access Token ");
                 }
-                
             }
             return StreamSupport.stream(rolesCursor.spliterator(), false)
                 .map(JsonNode::asText)
                 .collect(Collectors.toSet());
         } catch (Exception e) {
-            log.error("Error Grabbing Client Roles from OIDC User Info: Realm roles must follow the convention {}", jwtRolesPath);
+            log.error("Error Grabbing Client Roles from OIDC User Info: Realm roles must follow the convention {}", jwtRolesPath, e);
         }
         return Collections.emptyList();
-    } 
-    
-    
+    }
 }

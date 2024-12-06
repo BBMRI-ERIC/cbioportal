@@ -18,6 +18,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.web.SecurityFilterChain;
@@ -41,27 +42,40 @@ public class OAuth2SecurityConfig {
 
     private static final Logger log = LoggerFactory.getLogger(OAuth2SecurityConfig.class);
 
-
     @Value("${spring.security.oauth2.client.jwt-roles-path:resource_access::cbioportal::roles}")
     private String jwtRolesPath;
-    
+
+    // @Value("${spring.security.oauth2.client.registration.authorization-uri:/oauth2/authorization}")
+    // private String authorizationRequestBaseUri;
+
     private static final String LOGIN_URL = "/login";
 
     @Bean
+    public OAuth2AuthorizationRequestResolver customAuthorizationRequestResolver(
+        ClientRegistrationRepository clientRegistrationRepository) {
+        return new OAuth2AuthRequestCustomParamsResolver(clientRegistrationRepository);
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
+        // OAuth2AuthorizationRequestResolver resolver = new OAuth2AuthRequestCustomParamsResolver(clientRegistrationRepository, "/oauth2/authorization");
+
         http.csrf(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
-            .authorizeHttpRequests(authorize -> 
+            .authorizeHttpRequests(authorize ->
                 authorize
                     .requestMatchers("/api/health", LOGIN_URL, "/images/**").permitAll()
                     .anyRequest().authenticated()
             )
             .oauth2Login(login ->
                 login
+                    .authorizationEndpoint(authorization -> authorization
+                        .authorizationRequestResolver(customAuthorizationRequestResolver(clientRegistrationRepository))
+                    )
                     .loginPage(LOGIN_URL)
                     .userInfoEndpoint(userInfo ->
-                    userInfo.userAuthoritiesMapper(userAuthoritiesMapper())
-                )
+                        userInfo.userAuthoritiesMapper(userAuthoritiesMapper())
+                    )
                     .failureUrl(LOGIN_URL + "?logout_failure")
             )
             .logout(logout -> logout
@@ -69,7 +83,7 @@ public class OAuth2SecurityConfig {
             );
         return http.build();
     }
-    
+
 
     private GrantedAuthoritiesMapper userAuthoritiesMapper() {
         return (authorities) -> {
@@ -94,10 +108,10 @@ public class OAuth2SecurityConfig {
                         .map(claim -> ClaimRoleExtractorUtil.extractClientRoles(claim, jwtRolesPath))
                         .flatMap(Collection::stream)
                         .collect(Collectors.toSet());
-                    
+
                     mappedAuthorities.addAll(GrantedAuthorityUtil.generateGrantedAuthoritiesFromRoles(roles));
                 }
-                });
+            });
             return mappedAuthorities;
         };
     }

@@ -28,50 +28,66 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
-package org.cbioportal.persistence;
+package org.cbioportal.security.config;
 
 // imports
+import java.util.Collections;
 import java.util.Set;
 
 import org.cbioportal.model.User;
 import org.cbioportal.model.UserAuthorities;
+import org.cbioportal.persistence.SecurityRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
+import org.springframework.stereotype.Service;
+
 
 /**
- * The resolver class implementing SecurityRepository interface 
- * can define how users (and their rights) are evaluated.
- * Depending on the resolver type (template), it can be used in different
- * contexts. For example, FullAccessResolver implements SecurityRepository<Object> 
- * can be used anywhere since it implements object. If you need to access specific properties 
- * of the user authentication context, you have to implement for example 
- * SecurityRepository<OidcUser> interface, but then your resolver is usable only
- * with authentication type of oauth2.
+ * Security resolver usable for any authentication scheme.
+ * Allows any user authenticated by any auth method.
+ * Allows access to public datasets only for any user.
+ * Does not support non-public datasets.
  */
-public interface SecurityRepository<AuthUserContext> {
+@Service
+@ConditionalOnProperty(name = "security.repository.type", havingValue = "disabled")
+public class SecurityDisabledRepository implements SecurityRepository<Object> {
 
     /**
-     * Given a user id, returns a user instance.
-     * If username does not exist in db, returns null.
+     * Always returns a valid user.
      *
      * @param username String
-     * @param user object that has necessary user information
+     * @param user Object
      * @return User
      */
-    User getPortalUser(String username, AuthUserContext user);
+    @Override
+    public User getPortalUser(String username, Object user) {
+        return new User(username, username, true);
+    }
 
     /**
      * Given a user id, returns a UserAuthorities instance.
      * If username does not exist in db, returns null.
      *
      * @param username String
-     * @param user object that has necessary user information
+     * @param user Object
      * @return UserAuthorities
      */
-    UserAuthorities getPortalUserAuthorities(String username, AuthUserContext user);
+    @Override
+    public UserAuthorities getPortalUserAuthorities(String username, Object user) {
+        return new UserAuthorities();
+    }
 
-    void addPortalUser(User user);
-    void addPortalUserAuthorities(UserAuthorities userAuthorities);
+    @Override
+    public void addPortalUser(User user) {
+        //no-op
+    }
+
+    @Override
+    public void addPortalUserAuthorities(UserAuthorities userAuthorities) {
+        //no-op
+    }
 
     /**
      * Given an internal cancer study id, returns a set of upper case cancer study group strings.
@@ -80,5 +96,8 @@ public interface SecurityRepository<AuthUserContext> {
      * @param internalCancerStudyId Integer
      * @return Set<String> cancer study group strings in upper case
      */
-    Set<String> getCancerStudyGroups(Integer internalCancerStudyId);
+    @Override
+    public Set<String> getCancerStudyGroups(Integer internalCancerStudyId) {
+        return Collections.emptySet();
+    }
 }

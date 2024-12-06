@@ -28,7 +28,7 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package org.cbioportal.persistence.mybatis;
 
@@ -45,26 +45,37 @@ import org.cbioportal.model.User;
 import org.cbioportal.model.UserAuthorities;
 import org.cbioportal.persistence.SecurityRepository;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Security resolver usable for any authentication scheme.
+ * Requires presence of user entries & roles in the local database.
+ * Even a successful authentication over a third-party provider will not
+ * be accepted if the user does not exist in the database.
+ */
 @Repository
-public class SecurityMyBatisRepository implements SecurityRepository {
+@ConditionalOnProperty(name = "security.repository.type", havingValue = "cbioportal", matchIfMissing = true)
+public class SecurityMyBatisRepository implements SecurityRepository<Object> {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityMyBatisRepository.class);
 
     @Autowired
     private SecurityMapper securityMapper;
+    @Autowired
+    private StudyGroupMapper studyGroupMapper;
 
     /**
      * Given a user id, returns a user instance.
      * If username does not exist in db, returns null.
      *
      * @param username String
+     * @param _unused
      * @return User
      */
     @Override
-    public User getPortalUser(String username) {
+    public User getPortalUser(String username, Object _unused) {
         User user = securityMapper.getPortalUser(username);
         if (user != null) {
             log.debug("User " + username + " was found in the users table, email is " + user.getEmail());
@@ -79,10 +90,11 @@ public class SecurityMyBatisRepository implements SecurityRepository {
      * If username does not exist in db, returns null.
      *
      * @param username String
+     * @param _unused
      * @return UserAuthorities
      */
     @Override
-    public UserAuthorities getPortalUserAuthorities(String username) {
+    public UserAuthorities getPortalUserAuthorities(String username, Object _unused) {
         return securityMapper.getPortalUserAuthorities(username);
     }
 
@@ -107,10 +119,10 @@ public class SecurityMyBatisRepository implements SecurityRepository {
      */
     @Override
     public Set<String> getCancerStudyGroups(Integer internalCancerStudyId) {
-        String groups = securityMapper.getCancerStudyGroups(internalCancerStudyId);
+        String groups = studyGroupMapper.getCancerStudyGroups(internalCancerStudyId);
         if (groups == null) {
             return Collections.emptySet();
         }
-        return new HashSet<String>(Arrays.asList(groups.toUpperCase().split(";"))); 
+        return new HashSet<String>(Arrays.asList(groups.toUpperCase().split(";")));
     }
 }

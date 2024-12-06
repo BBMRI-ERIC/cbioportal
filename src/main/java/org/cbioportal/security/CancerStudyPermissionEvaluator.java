@@ -89,7 +89,7 @@ public class CancerStudyPermissionEvaluator implements PermissionEvaluator {
 //            PUBLIC_CANCER_STUDIES_GROUP = null;
 //        }
 //    }
-    
+
     public CancerStudyPermissionEvaluator(final String appName, final String doFilterGroupsByAppName, final String alwaysShowCancerStudyGroup, final CacheMapUtil cacheMapUtil ) {
         this.APP_NAME = appName;
         this.FILTER_GROUPS_BY_APP_NAME = doFilterGroupsByAppName;
@@ -110,7 +110,7 @@ public class CancerStudyPermissionEvaluator implements PermissionEvaluator {
             log.debug("hasPermission(), checking permissions on targetDomainObject");
         }
         if (targetDomainObject == null) {
-           if (log.isDebugEnabled()) {
+            if (log.isDebugEnabled()) {
                 log.debug("hasPermission(), targetDomainObject is null, returning false");
             }
             return false;
@@ -165,7 +165,7 @@ public class CancerStudyPermissionEvaluator implements PermissionEvaluator {
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
         if (log.isDebugEnabled()) {
-            log.debug("hasPermission(), checking permissions on targetId");
+            log.debug("hasPermission(), checking permissions on targetId " + targetType);
         }
         if (targetId == null) {
             if (log.isDebugEnabled()) {
@@ -264,7 +264,7 @@ public class CancerStudyPermissionEvaluator implements PermissionEvaluator {
         }
         // if a user has access to 'all_tcga', simply return true for tcga studies
         if (grantedAuthorities.contains(ALL_TCGA_CANCER_STUDIES_ID.toUpperCase()) &&
-                stableStudyID.toUpperCase().endsWith("_TCGA")) {
+            stableStudyID.toUpperCase().endsWith("_TCGA")) {
             if (log.isDebugEnabled()) {
                 log.debug("hasAccessToCancerStudy(), user has access to ALL_TCGA cancer studies return true");
             }
@@ -272,9 +272,9 @@ public class CancerStudyPermissionEvaluator implements PermissionEvaluator {
         }
         // if a user has access to 'all_target', simply return true for target studies
         if (grantedAuthorities.contains(ALL_TARGET_CANCER_STUDIES_ID.toUpperCase()) &&
-                (stableStudyID.toUpperCase().endsWith("_TARGET")
-                        || stableStudyID.equalsIgnoreCase("ALL_TARGET_PHASE1")
-                        || stableStudyID.equalsIgnoreCase("ALL_TARGET_PHASE2"))) {
+            (stableStudyID.toUpperCase().endsWith("_TARGET")
+                || stableStudyID.equalsIgnoreCase("ALL_TARGET_PHASE1")
+                || stableStudyID.equalsIgnoreCase("ALL_TARGET_PHASE2"))) {
             if (log.isDebugEnabled()) {
                 log.debug("hasAccessToCancerStudy(), user has access to ALL_NCI_TARGET cancer studies return true");
             }

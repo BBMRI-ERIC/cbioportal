@@ -26,7 +26,7 @@ import java.util.Set;
 
 @Configuration
 @EnableWebSecurity
-@ConditionalOnProperty(value = "authorization", havingValue = "true")
+@ConditionalOnProperty(value = "authenticate", havingValue = "oauth2")
 public class CustomOAuth2AuthorizationConfig {
     Logger log = LoggerFactory.getLogger(CustomOAuth2AuthorizationConfig.class);
 

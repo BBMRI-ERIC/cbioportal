@@ -3,7 +3,7 @@ name: BBMRI Publish and Build Docker Image
 on:
   push:
     branches:
-      - 'feat/authorization'
+      - 'bbmri-master'
 
 env:
   REGISTRY_NAME: ghcr.io

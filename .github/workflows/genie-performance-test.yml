@@ -1,19 +1,19 @@
 name: genie-performance-test
 
 on:
-  schedule:
-    - cron:  '0 8 * * *'
+  #schedule:
+  #  - cron:  '0 8 * * *'
 
 jobs:
   probe-genie-endpoint:
-    
+
     name: Genie private endpoint probe
 
     runs-on: ubuntu-latest
-    
+
     env:
       SLACK_URL_SECRET: ${{ secrets.SLACK_URL_SECRET }}
-      SLACK_CHANNEL: backend-performance-status 
+      SLACK_CHANNEL: backend-performance-status
 
     steps:
     - name: GET request to genie private page

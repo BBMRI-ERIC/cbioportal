@@ -79,7 +79,7 @@ public class OAuth2AuthRequestCustomParamsResolver implements OAuth2Authorizatio
     // private OAuthCustomRequestParams authParams;
     //TODO Try making it dynamic by using the above (auto-expanded config map key:value)
     @Value("${security.custom.oauth.request.acr:}")
-    private String acr_value;
+    private String acr_values;
 
     public OAuth2AuthRequestCustomParamsResolver(ClientRegistrationRepository repo) {
         this.defaultResolver = new DefaultOAuth2AuthorizationRequestResolver(repo, "/oauth2/authorization");
@@ -108,9 +108,9 @@ public class OAuth2AuthRequestCustomParamsResolver implements OAuth2Authorizatio
         //     additionalParams.putAll(params);
         //     builder.additionalParameters(additionalParams);
         // } else 
-        if (acr_value != null && acr_value != "") {
+        if (acr_values != null && acr_values != "") {
             Map<String, Object> additionalParams = new HashMap<>(authorizationRequest.getAdditionalParameters());
-            additionalParams.put("acr_value", acr_value);
+            additionalParams.put("acr_values", acr_values);
             builder.additionalParameters(additionalParams);
         }
 

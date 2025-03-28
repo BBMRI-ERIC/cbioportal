@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.net.URI;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +96,7 @@ public class LsaaiOauth2DrivenResolver implements SecurityRepository<OidcUser> {
     @Value("${filter_groups_by_appname:true}")
     private String doFilterGroupsByAppName;
 
-    private UserAuthorities authorities = null;
+    private final TimeoutCache<String, UserAuthorities> userInfoCache = new TimeoutCache<>(300000);
 
     /**
      * Always returns a valid user.
@@ -105,6 +106,7 @@ public class LsaaiOauth2DrivenResolver implements SecurityRepository<OidcUser> {
      */
     @Override
     public User getPortalUser(String username, OidcUser user) {
+        UserAuthorities authorities = userInfoCache.get(username);
         if (authorities == null) {
             if (!parseUserInfo(username, user.getUserInfo(), user.getIdToken())) {
                 return null;
@@ -122,7 +124,7 @@ public class LsaaiOauth2DrivenResolver implements SecurityRepository<OidcUser> {
      */
     @Override
     public UserAuthorities getPortalUserAuthorities(String username, OidcUser user) {
-        return authorities;
+        return userInfoCache.get(username);
     }
 
     @Override
@@ -196,7 +198,7 @@ public class LsaaiOauth2DrivenResolver implements SecurityRepository<OidcUser> {
                 }
             }
         }
-        authorities = new UserAuthorities(username, result);
+        userInfoCache.put(username, new UserAuthorities(username, result));
         return true;
     }
 
@@ -214,5 +216,36 @@ public class LsaaiOauth2DrivenResolver implements SecurityRepository<OidcUser> {
             log.debug("Parsed ARG rule does not contain enough elements! " + input);
         }
         return null;
+    }
+
+    private static class TimeoutCache<K, V> {
+        private class CacheEntry {
+            V value;
+            long expiryTime;
+        }
+
+        private final long ttlMillis;
+        private final ConcurrentHashMap<K, CacheEntry> map = new ConcurrentHashMap<>();
+
+        public TimeoutCache(long ttlMillis) {
+            this.ttlMillis = ttlMillis;
+        }
+
+        public void put(K key, V value) {
+            CacheEntry entry = new CacheEntry();
+            entry.value = value;
+            entry.expiryTime = System.currentTimeMillis() + ttlMillis;
+            map.put(key, entry);
+        }
+
+        public V get(K key) {
+            CacheEntry entry = map.get(key);
+            if (entry == null) return null;
+            if (System.currentTimeMillis() > entry.expiryTime) {
+                map.remove(key);
+                return null;
+            }
+            return entry.value;
+        }
     }
 }

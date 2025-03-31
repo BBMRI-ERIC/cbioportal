@@ -39,8 +39,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
-import java.net.URI;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -53,13 +51,6 @@ import org.cbioportal.persistence.mybatis.StudyGroupMapper;
 
 import org.springframework.stereotype.Service;
 
-import org.springframework.web.client.RestTemplate;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -106,12 +97,19 @@ public class LsaaiOauth2DrivenResolver implements SecurityRepository<OidcUser> {
      */
     @Override
     public User getPortalUser(String username, OidcUser user) {
-        UserAuthorities authorities = userInfoCache.get(username);
+        UserAuthorities authorities = userInfoCache.get(username, true);
         if (authorities == null) {
             if (!parseUserInfo(username, user.getUserInfo(), user.getIdToken())) {
                 return null;
             }
         }
+        if (authorities == null) {
+            authorities = userInfoCache.get(username, true);
+        }
+        if (authorities != null) {
+            log.info("User" + username + " Logged in, using permissions " + authorities.getAuthorities().toString());
+        }
+        
         return new User(username, username, true);
     }
 
@@ -124,7 +122,14 @@ public class LsaaiOauth2DrivenResolver implements SecurityRepository<OidcUser> {
      */
     @Override
     public UserAuthorities getPortalUserAuthorities(String username, OidcUser user) {
-        return userInfoCache.get(username);
+        // TODO we could allow expiration, and re-execute parseUserInfo instead
+        UserAuthorities authorities = userInfoCache.get(username, false);
+        if (authorities != null) {
+            log.info("User" + username + " cached permissions " + authorities.getAuthorities().toString());
+        } else {
+            log.info("User" + username + " no cached permissions!");
+        }
+        return authorities;
     }
 
     @Override
@@ -238,10 +243,10 @@ public class LsaaiOauth2DrivenResolver implements SecurityRepository<OidcUser> {
             map.put(key, entry);
         }
 
-        public V get(K key) {
+        public V get(K key, boolean withInvalidation) {
             CacheEntry entry = map.get(key);
             if (entry == null) return null;
-            if (System.currentTimeMillis() > entry.expiryTime) {
+            if (withInvalidation && System.currentTimeMillis() > entry.expiryTime) {
                 map.remove(key);
                 return null;
             }

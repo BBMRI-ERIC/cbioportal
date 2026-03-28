@@ -89,7 +89,7 @@ public class OAuth2TokenRefreshRestTemplate {
       return accessToken;
     } catch (Exception e) {
       logger.error(
-          "Authentication server did not return an access token. Server response:\n{}", response);
+          "Authentication server did not return an access token. Server response:\n{}", response, e);
       throw new BadCredentialsException("Authentication server did not return an access token.");
     }
   }

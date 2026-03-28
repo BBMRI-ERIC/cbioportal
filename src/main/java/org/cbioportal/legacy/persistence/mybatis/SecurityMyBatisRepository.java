@@ -44,14 +44,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 @Repository
-public class SecurityMyBatisRepository implements SecurityRepository {
+@ConditionalOnProperty(name = "security.repository.type", havingValue = "cbioportal", matchIfMissing = true)
+public class SecurityMyBatisRepository implements SecurityRepository<Object> {
 
   private static final Logger log = LoggerFactory.getLogger(SecurityMyBatisRepository.class);
 
   @Autowired private SecurityMapper securityMapper;
-
+  
+  @Autowired private StudyGroupMapper studyGroupMapper;
   /**
    * Given a user id, returns a user instance. If username does not exist in db, returns null.
    *
@@ -59,7 +62,7 @@ public class SecurityMyBatisRepository implements SecurityRepository {
    * @return User
    */
   @Override
-  public User getPortalUser(String username) {
+  public User getPortalUser(String username, Object _unusedUserInfo) {
     User user = securityMapper.getPortalUser(username);
     if (user != null) {
       log.debug("User " + username + " was found in the users table, email is " + user.getEmail());
@@ -77,7 +80,7 @@ public class SecurityMyBatisRepository implements SecurityRepository {
    * @return UserAuthorities
    */
   @Override
-  public UserAuthorities getPortalUserAuthorities(String username) {
+  public UserAuthorities getPortalUserAuthorities(String username, Object _unusedUserInfo) {
     return securityMapper.getPortalUserAuthorities(username);
   }
 
@@ -102,7 +105,7 @@ public class SecurityMyBatisRepository implements SecurityRepository {
    */
   @Override
   public Set<String> getCancerStudyGroups(Integer internalCancerStudyId) {
-    String groups = securityMapper.getCancerStudyGroups(internalCancerStudyId);
+    String groups = studyGroupMapper.getCancerStudyGroups(internalCancerStudyId);
     if (groups == null) {
       return Collections.emptySet();
     }

@@ -143,6 +143,7 @@ public class OAuth2DataAccessTokenServiceImpl implements DataAccessTokenService 
 
   @Override
   public Boolean isValid(final String token) {
+    // TODO: Usage of deprecated helper means incompatibility with newer tokens, use com.nimbusds.jwt.JWTParser   
     final String kid = JwtHelper.headers(token).get("kid");
     try {
 

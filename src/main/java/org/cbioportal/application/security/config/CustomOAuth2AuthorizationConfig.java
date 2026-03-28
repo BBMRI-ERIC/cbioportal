@@ -28,13 +28,13 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 public class CustomOAuth2AuthorizationConfig {
   Logger log = LoggerFactory.getLogger(CustomOAuth2AuthorizationConfig.class);
 
-  private final SecurityRepository securityRepository;
+  private final SecurityRepository<OidcUser> securityRepository;
 
   private static final String NAME_ATTRIBUTE_KEY = "email";
 
   @Autowired
-  public CustomOAuth2AuthorizationConfig(SecurityRepository securityRepository) {
-    this.securityRepository = securityRepository;
+  public CustomOAuth2AuthorizationConfig(SecurityRepository<OidcUser> securityRepository) {
+      this.securityRepository = securityRepository;
   }
 
   @Bean
@@ -47,10 +47,10 @@ public class CustomOAuth2AuthorizationConfig {
       // Delegate to the default implementation for loading a user
       OidcUser oidcUser = delegate.loadUser(userRequest);
 
-      var authenticatedPortalUser = loadPortalUser(oidcUser.getEmail());
+      var authenticatedPortalUser = loadPortalUser(oidcUser.getEmail(), oidcUser);
       if (Objects.isNull(authenticatedPortalUser.cbioUser)
           || !authenticatedPortalUser.cbioUser.isEnabled()) {
-        log.debug("User: {} either not in db or not authorized", oidcUser.getEmail());
+        log.error("User: {} either not in db or not authorized", oidcUser.getEmail());
         throw new OAuth2AuthenticationException("user not authorized");
       }
       Set<GrantedAuthority> mappedAuthorities = authenticatedPortalUser.authorities;
@@ -61,11 +61,11 @@ public class CustomOAuth2AuthorizationConfig {
     };
   }
 
-  private AuthenticatedPortalUser loadPortalUser(String email) {
+  private AuthenticatedPortalUser loadPortalUser(String username, OidcUser user) {
     Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
-    User cbioUser = securityRepository.getPortalUser(email);
+    User cbioUser = securityRepository.getPortalUser(username, user);
     if (!Objects.isNull(cbioUser)) {
-      UserAuthorities authorities = securityRepository.getPortalUserAuthorities(email);
+      UserAuthorities authorities = securityRepository.getPortalUserAuthorities(username, user);
       if (!Objects.isNull(authorities)) {
         mappedAuthorities.addAll(AuthorityUtils.createAuthorityList(authorities.getAuthorities()));
       }

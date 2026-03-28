@@ -17,9 +17,9 @@ import org.springframework.security.core.authority.AuthorityUtils;
 public class UuidTokenAuthenticationProvider implements AuthenticationProvider {
   private static final Logger log = LoggerFactory.getLogger(UuidTokenAuthenticationProvider.class);
 
-  private final SecurityRepository securityRepository;
+  private final SecurityRepository<? super Authentication> securityRepository;
 
-  public UuidTokenAuthenticationProvider(final SecurityRepository securityRepository) {
+  public UuidTokenAuthenticationProvider(final SecurityRepository<? super Authentication> securityRepository) {
     this.securityRepository = securityRepository;
   }
 
@@ -27,7 +27,8 @@ public class UuidTokenAuthenticationProvider implements AuthenticationProvider {
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     String user = (String) authentication.getPrincipal();
     log.debug("Attempt to grab user Authorities for user: {}", user);
-    UserAuthorities authorities = securityRepository.getPortalUserAuthorities(user);
+    // TODO: we should probably document what attributes are being sent based on the provided auth method
+    UserAuthorities authorities = securityRepository.getPortalUserAuthorities(user, authentication);
     Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
     if (!Objects.isNull(authorities)) {
       mappedAuthorities.addAll(AuthorityUtils.createAuthorityList(authorities.getAuthorities()));

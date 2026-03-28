@@ -26,6 +26,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.web.SecurityFilterChain;
@@ -43,6 +44,13 @@ public class OAuth2SecurityConfig {
   private String jwtRolesPath;
 
   private static final String LOGIN_URL = "/login";
+  
+  // todo bean!!! remove since collision with config
+  @Bean
+  public OAuth2AuthorizationRequestResolver customAuthorizationRequestResolver(
+    ClientRegistrationRepository clientRegistrationRepository) {
+    return new OAuth2AuthRequestCustomParamsResolver(clientRegistrationRepository);
+  }
 
   @Bean
   @Order(1)
@@ -61,6 +69,9 @@ public class OAuth2SecurityConfig {
         .oauth2Login(
             login ->
                 login
+                    .authorizationEndpoint(authorization -> authorization
+                        .authorizationRequestResolver(customAuthorizationRequestResolver(clientRegistrationRepository))
+                    )
                     .loginPage(LOGIN_URL)
                     .userInfoEndpoint(
                         userInfo -> userInfo.userAuthoritiesMapper(userAuthoritiesMapper()))

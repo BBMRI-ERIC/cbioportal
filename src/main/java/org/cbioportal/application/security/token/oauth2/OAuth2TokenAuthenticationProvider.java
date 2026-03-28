@@ -32,9 +32,10 @@
 
 package org.cbioportal.application.security.token.oauth2;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
+import java.util.Map;
+
+import com.nimbusds.jwt.JWTParser;
+import com.nimbusds.jwt.JWT;
 import java.util.Collection;
 import org.cbioportal.application.security.util.ClaimRoleExtractorUtil;
 import org.cbioportal.application.security.util.GrantedAuthorityUtil;
@@ -44,8 +45,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.jwt.Jwt;
-import org.springframework.security.jwt.JwtHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OAuth2TokenAuthenticationProvider implements AuthenticationProvider {
 
@@ -53,6 +54,8 @@ public class OAuth2TokenAuthenticationProvider implements AuthenticationProvider
   private String jwtRolesPath;
 
   private final OAuth2TokenRefreshRestTemplate tokenRefreshRestTemplate;
+
+  private static final Logger LOG = LoggerFactory.getLogger(OAuth2TokenAuthenticationProvider.class);
 
   public OAuth2TokenAuthenticationProvider(
       OAuth2TokenRefreshRestTemplate tokenRefreshRestTemplate) {
@@ -85,32 +88,25 @@ public class OAuth2TokenAuthenticationProvider implements AuthenticationProvider
   private Collection<GrantedAuthority> extractAuthorities(final String token)
       throws BadCredentialsException {
     try {
-      final Jwt tokenDecoded = JwtHelper.decode(token);
-      final String claims = tokenDecoded.getClaims();
+      final JWT tokenDecoded = JWTParser.parse(token);
+      final Map<String, Object> claims = tokenDecoded.getJWTClaimsSet().toJSONObject();
       return GrantedAuthorityUtil.generateGrantedAuthoritiesFromRoles(
           ClaimRoleExtractorUtil.extractClientRoles(claims, jwtRolesPath));
 
     } catch (Exception e) {
-      throw new BadCredentialsException("Authorities could not be extracted from access token.");
+      throw new BadCredentialsException("Authorities could not be extracted from access token: " + e.getMessage());
     }
   }
 
   private String getUsername(final String token) {
 
-    final Jwt tokenDecoded = JwtHelper.decode(token);
-
-    final String claims = tokenDecoded.getClaims();
-    JsonNode claimsMap;
     try {
-      claimsMap = new ObjectMapper().readTree(claims);
-    } catch (IOException e) {
-      throw new BadCredentialsException("User name could not be found in access token.");
+      final JWT tokenDecoded = JWTParser.parse(token);
+      final Object sub = tokenDecoded.getJWTClaimsSet().getClaim("sub");
+      return (sub instanceof String) ? (String) sub : null;
+    } catch (Exception e) {
+      LOG.warn("Failed to parse token: authentication failed!", e);
+      return null;
     }
-
-    if (!claimsMap.has("sub")) {
-      throw new BadCredentialsException("User name could not be found in access token.");
-    }
-
-    return claimsMap.get("sub").asText();
   }
 }

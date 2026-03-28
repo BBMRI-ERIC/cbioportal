@@ -30,7 +30,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.cbioportal.security.config;
+package org.cbioportal.application.security.config;
 
 // imports
 import java.util.Collections;
@@ -38,7 +38,7 @@ import java.util.Set;
 
 import org.cbioportal.legacy.model.User;
 import org.cbioportal.legacy.model.UserAuthorities;
-import org.cbioportal.persistence.SecurityRepository;
+import org.cbioportal.legacy.persistence.SecurityRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import org.springframework.stereotype.Service;

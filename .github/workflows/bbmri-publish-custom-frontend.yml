@@ -35,24 +35,31 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Resolve frontend source
+        shell: bash
         run: |
-          FRONTEND_REPO_INPUT='${{ github.event.inputs.frontend_repo || env.FRONTEND_REPO }}'
-          FRONTEND_REF_INPUT='${{ github.event.inputs.frontend_ref || env.FRONTEND_REF }}'
+          FRONTEND_REPO_INPUT="${{ github.event.inputs.frontend_repo || env.FRONTEND_REPO }}"
+          FRONTEND_REF_INPUT="${{ github.event.inputs.frontend_ref || env.FRONTEND_REF }}"
 
-          FRONTEND_REF_INPUT="${FRONTEND_REF_INPUT%\"}"
+          # Turn escaped quotes like \"master\" into "master"
+          FRONTEND_REF_INPUT="${FRONTEND_REF_INPUT//\\\"/\"}"
+
+          # Remove one pair of surrounding double quotes, if present
           FRONTEND_REF_INPUT="${FRONTEND_REF_INPUT#\"}"
+          FRONTEND_REF_INPUT="${FRONTEND_REF_INPUT%\"}"
 
           echo "FRONTEND_REPO=$FRONTEND_REPO_INPUT" >> "$GITHUB_ENV"
           echo "FRONTEND_REF=$FRONTEND_REF_INPUT" >> "$GITHUB_ENV"
 
-      - name: Check out custom frontend
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.FRONTEND_REPO }}
-          ref: ${{ env.FRONTEND_REF }}
-          path: cbioportal-frontend
-          # Use a PAT if the frontend repo is private.
-          token: ${{ secrets.FRONTEND_REPO_TOKEN || secrets.GITHUB_TOKEN }}
+      - name: Generate image metadata
+        shell: bash
+        run: |
+          echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
+          SAFE_FRONTEND_REF="$(printf '%s' "$FRONTEND_REF" \
+            | tr '/:' '--' \
+            | sed 's/[^A-Za-z0-9._-]/-/g')"
+
+          echo "SAFE_FRONTEND_REF=$SAFE_FRONTEND_REF" >> "$GITHUB_ENV"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

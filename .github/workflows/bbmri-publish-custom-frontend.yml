@@ -40,15 +40,32 @@ jobs:
           FRONTEND_REPO_INPUT="${{ github.event.inputs.frontend_repo || env.FRONTEND_REPO }}"
           FRONTEND_REF_INPUT="${{ github.event.inputs.frontend_ref || env.FRONTEND_REF }}"
 
-          # Turn escaped quotes like \"master\" into "master"
           FRONTEND_REF_INPUT="${FRONTEND_REF_INPUT//\\\"/\"}"
-
-          # Remove one pair of surrounding double quotes, if present
           FRONTEND_REF_INPUT="${FRONTEND_REF_INPUT#\"}"
           FRONTEND_REF_INPUT="${FRONTEND_REF_INPUT%\"}"
 
           echo "FRONTEND_REPO=$FRONTEND_REPO_INPUT" >> "$GITHUB_ENV"
           echo "FRONTEND_REF=$FRONTEND_REF_INPUT" >> "$GITHUB_ENV"
+
+      - name: Check out custom frontend
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.FRONTEND_REPO }}
+          ref: ${{ env.FRONTEND_REF }}
+          path: cbioportal-frontend
+          token: ${{ secrets.FRONTEND_REPO_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Verify frontend checkout
+        shell: bash
+        run: |
+          echo "workspace: $GITHUB_WORKSPACE"
+          pwd
+          ls -la
+          ls -la "$GITHUB_WORKSPACE"
+          ls -la "$GITHUB_WORKSPACE/cbioportal-frontend"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Generate image metadata
         shell: bash
@@ -61,9 +78,6 @@ jobs:
 
           echo "SAFE_FRONTEND_REF=$SAFE_FRONTEND_REF" >> "$GITHUB_ENV"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -74,11 +88,11 @@ jobs:
       - name: Build and push image with custom frontend
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ${{ env.DOCKER_FILE }}
+          context: ${{ github.workspace }}
+          file: ${{ github.workspace }}/${{ env.DOCKER_FILE }}
           push: true
           build-contexts: |
-            frontend-src=./cbioportal-frontend
+            frontend-src=${{ github.workspace }}/cbioportal-frontend
           build-args: |
             FRONTEND_REPO=${{ env.FRONTEND_REPO }}
             FRONTEND_REF=${{ env.FRONTEND_REF }}

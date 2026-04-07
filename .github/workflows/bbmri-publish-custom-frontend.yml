@@ -36,8 +36,14 @@ jobs:
 
       - name: Resolve frontend source
         run: |
-          echo "FRONTEND_REPO=${{ github.event.inputs.frontend_repo || env.FRONTEND_REPO }}" >> "$GITHUB_ENV"
-          echo "FRONTEND_REF=${{ github.event.inputs.frontend_ref || env.FRONTEND_REF }}" >> "$GITHUB_ENV"
+          FRONTEND_REPO_INPUT='${{ github.event.inputs.frontend_repo || env.FRONTEND_REPO }}'
+          FRONTEND_REF_INPUT='${{ github.event.inputs.frontend_ref || env.FRONTEND_REF }}'
+
+          FRONTEND_REF_INPUT="${FRONTEND_REF_INPUT%\"}"
+          FRONTEND_REF_INPUT="${FRONTEND_REF_INPUT#\"}"
+
+          echo "FRONTEND_REPO=$FRONTEND_REPO_INPUT" >> "$GITHUB_ENV"
+          echo "FRONTEND_REF=$FRONTEND_REF_INPUT" >> "$GITHUB_ENV"
 
       - name: Check out custom frontend
         uses: actions/checkout@v4

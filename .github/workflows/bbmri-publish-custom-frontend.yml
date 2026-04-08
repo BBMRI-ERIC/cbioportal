@@ -18,7 +18,7 @@ on:
 env:
   REGISTRY_NAME: ghcr.io
   IMAGE_NAME: bbmri-eric/cbioportal
-  DOCKER_FILE: docker/web-and-data/Dockerfile
+  DOCKER_FILE: docker/bbmri/Dockerfile
   FRONTEND_REPO: BBMRI-ERIC/cbioportal-frontend
   FRONTEND_REF: v6.4.1
 
@@ -96,6 +96,8 @@ jobs:
           build-args: |
             FRONTEND_REPO=${{ env.FRONTEND_REPO }}
             FRONTEND_REF=${{ env.FRONTEND_REF }}
+            FRONTEND_GROUP_ID=org.cbioportal
+            FRONTEND_VERSION=${{ env.FRONTEND_REF }}
           tags: |
             ${{ env.REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}
             ${{ env.REGISTRY_NAME }}/${{ env.IMAGE_NAME }}:${{ env.SAFE_FRONTEND_REF }}-${{ env.SHORT_SHA }}

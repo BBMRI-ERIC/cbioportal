@@ -3,8 +3,6 @@ WORKDIR /frontend
 
 COPY --from=frontend-src package.json yarn.lock ./
 
-RUN npm install -g yarn@1.22.22
-
 RUN yarn install --frozen-lockfile
 
 COPY --from=frontend-src . ./

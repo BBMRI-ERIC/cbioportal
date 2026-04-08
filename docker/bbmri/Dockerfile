@@ -10,8 +10,7 @@ RUN node --version
 RUN yarn --version
 
 RUN yarn install
-RUN yarn run buildDLL:dev && yarn run buildModules && yarn run build-production
-
+RUN yarn run build
 
 FROM maven:3-eclipse-temurin-21 AS frontend-maven
 WORKDIR /frontend-src

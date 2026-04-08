@@ -1,8 +1,10 @@
-FROM node:20-bullseye AS frontend-build
+FROM node:24.11.1-bullseye AS frontend-build
 WORKDIR /frontend
 
 COPY --from=frontend-src package.json yarn.lock ./
-RUN yarn set version 1.22.5 || true
+
+RUN npm install -g yarn@1.22.22
+
 RUN yarn install --frozen-lockfile
 
 COPY --from=frontend-src . ./

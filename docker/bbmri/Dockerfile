@@ -3,9 +3,11 @@ WORKDIR /frontend
 
 COPY --from=frontend-src . ./
 
-RUN npm install -g yarn@1.22.22
-RUN yarn --version
+RUN corepack enable
+RUN corepack prepare yarn@1.22.22 --activate
+
 RUN node --version
+RUN yarn --version
 
 RUN yarn install
 RUN yarn run buildDLL:dev && yarn run buildModules && yarn run build-production

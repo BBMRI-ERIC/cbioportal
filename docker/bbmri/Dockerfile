@@ -3,6 +3,9 @@ WORKDIR /frontend
 
 COPY --from=frontend-src . ./
 
+ARG BRANCH_ENV=master
+ENV BRANCH_ENV=${BRANCH_ENV}
+
 RUN corepack enable
 RUN corepack prepare yarn@1.22.22 --activate
 
@@ -17,14 +20,11 @@ WORKDIR /frontend-src
 COPY --from=frontend-build /frontend /frontend-src
 
 # Only keep this if the frontend repo actually contains a valid Maven packaging setup
-RUN mvn install -DskipTests
+RUN mvn install -DskipTests -Dgpg.skip=true
 
 
 FROM maven:3-eclipse-temurin-21 AS build
 WORKDIR /cbioportal
-
-ARG FRONTEND_GROUP_ID
-ARG FRONTEND_VERSION
 
 COPY pom.xml /cbioportal/
 COPY version.sh /cbioportal/
@@ -34,9 +34,14 @@ COPY . /cbioportal
 
 COPY --from=frontend-maven /root/.m2 /root/.m2
 
-RUN mvn clean package -DskipTests -Dspotless.check.skip=true \
-    -Dfrontend.version=${FRONTEND_VERSION} \
-    -Dfrontend.groupId=${FRONTEND_GROUP_ID} -q
+ARG FRONTEND_GROUP_ID=io.github.cbioportal
+ARG FRONTEND_VERSION=local
+
+RUN echo "FRONTEND_GROUP_ID=$FRONTEND_GROUP_ID" && \
+    echo "FRONTEND_VERSION=$FRONTEND_VERSION" && \
+    mvn clean package -DskipTests -Dspotless.check.skip=true \
+      -Dfrontend.version=${FRONTEND_VERSION} \
+      -Dfrontend.groupId=${FRONTEND_GROUP_ID} -q
 
 RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*-exec.jar)
 
@@ -55,9 +60,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /cbioportal
-RUN wget https://github.com/cBioPortal/cbioportal-core/releases/download/v1.0.11/core-1.0.11.jar -P core/ \
+RUN wget https://github.com/cBioPortal/cbioportal-core/releases/download/v1.0.16/core-1.0.16.jar -P core/ \
  && cd core \
- && jar -xf core-1.0.11.jar scripts/ requirements.txt \
+ && jar -xf core-1.0.16.jar scripts/ requirements.txt \
  && chmod -R a+x scripts/ \
  && cd ..
 

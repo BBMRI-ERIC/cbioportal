@@ -47,6 +47,7 @@ public class ResourceDefinitionControllerTest {
             + "    \"resourceType\": \"SAMPLE\","
             + "    \"priority\": \"1\","
             + "    \"openByDefault\": true,"
+            + "    \"externalTarget\": \"my-window\","
             + "    \"cancerStudyIdentifier\": \"test_study_id\""
             + "  },"
             + "  {"
@@ -56,6 +57,7 @@ public class ResourceDefinitionControllerTest {
             + "    \"resourceType\": \"PATIENT\","
             + "    \"priority\": \"2\","
             + "    \"openByDefault\": false,"
+            + "    \"externalTarget\": \"my-window\","
             + "    \"cancerStudyIdentifier\": \"test_study_id\""
             + "  },"
             + "  {"
@@ -65,6 +67,7 @@ public class ResourceDefinitionControllerTest {
             + "    \"resourceType\": \"STUDY\","
             + "    \"priority\": \"3\","
             + "    \"openByDefault\": true,"
+            + "    \"externalTarget\": \"my-window\","
             + "    \"cancerStudyIdentifier\": \"test_study_id\""
             + "  }"
             + "]";
@@ -113,6 +116,7 @@ public class ResourceDefinitionControllerTest {
             + "    \"resourceType\": \"SAMPLE\","
             + "    \"priority\": \"1\","
             + "    \"openByDefault\": true,"
+            + "    \"externalTarget\": \"my-window\","
             + "    \"cancerStudyIdentifier\": \"test_study_id\""
             + "  }";
 

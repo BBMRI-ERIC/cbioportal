@@ -28,6 +28,7 @@ public class ResourceDefinitionMyBatisRepositoryTest {
     Assert.assertEquals(ResourceType.SAMPLE, result.getResourceType());
     Assert.assertEquals("1", result.getPriority());
     Assert.assertEquals(true, result.getOpenByDefault());
+    Assert.assertEquals("my-window", result.getExternalTarget());
   }
 
   @Test
@@ -45,6 +46,7 @@ public class ResourceDefinitionMyBatisRepositoryTest {
     Assert.assertNull(resourceDefinition.getResourceType());
     Assert.assertNull(resourceDefinition.getPriority());
     Assert.assertNull(resourceDefinition.getOpenByDefault());
+    Assert.assertEquals("my-window", resourceDefinition.getExternalTarget());
   }
 
   @Test
@@ -62,6 +64,7 @@ public class ResourceDefinitionMyBatisRepositoryTest {
     Assert.assertEquals(ResourceType.SAMPLE, resourceDefinition.getResourceType());
     Assert.assertEquals("1", resourceDefinition.getPriority());
     Assert.assertEquals(true, resourceDefinition.getOpenByDefault());
+    Assert.assertEquals("my-window", resourceDefinition.getExternalTarget());
   }
 
   @Test
@@ -79,5 +82,6 @@ public class ResourceDefinitionMyBatisRepositoryTest {
     Assert.assertEquals(ResourceType.SAMPLE, resourceDefinition.getResourceType());
     Assert.assertEquals("1", resourceDefinition.getPriority());
     Assert.assertEquals(true, resourceDefinition.getOpenByDefault());
+    Assert.assertEquals("my-window", resourceDefinition.getExternalTarget());
   }
 }

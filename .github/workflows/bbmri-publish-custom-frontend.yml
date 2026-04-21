@@ -96,6 +96,7 @@ jobs:
           build-args: |
             FRONTEND_REPO=${{ env.FRONTEND_REPO }}
             FRONTEND_REF=${{ env.FRONTEND_REF }}
+            BRANCH_ENV=master
             FRONTEND_GROUP_ID=org.cbioportal
             FRONTEND_VERSION=${{ env.FRONTEND_REF }}
           tags: |

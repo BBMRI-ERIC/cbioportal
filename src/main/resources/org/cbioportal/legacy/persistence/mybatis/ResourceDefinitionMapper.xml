@@ -11,6 +11,7 @@
         <if test="projection == 'SUMMARY' || projection == 'DETAILED'">
             ,
             resource_definition.OPEN_BY_DEFAULT AS "${prefix}openByDefault",
+            resource_definition.EXTERNAL_TARGET AS "${prefix}externalTarget",
             resource_definition.DESCRIPTION AS "${prefix}description",
             resource_definition.RESOURCE_TYPE AS "${prefix}resourceType",
             resource_definition.PRIORITY AS "${prefix}priority",

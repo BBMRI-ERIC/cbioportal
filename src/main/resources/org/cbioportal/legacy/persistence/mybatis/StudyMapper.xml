@@ -102,6 +102,7 @@
         rd.PRIORITY AS priority,
         rd.OPEN_BY_DEFAULT AS openByDefault,
         CANCER_STUDY_IDENTIFIER as cancerStudyIdentifier,
+        rd.EXTERNAL_TARGET as externalTarget,
         rd.CUSTOM_METADATA AS customMetaData
     </sql>
 
@@ -222,12 +223,12 @@
         SELECT
         <include refid="selectSampleResourceCounts"/>
         <include refid="fromResourceSample"/>
-        GROUP BY displayName, description, resourceType, priority, openByDefault, cancerStudyIdentifier, customMetaData, resourceId
+        GROUP BY displayName, description, resourceType, priority, openByDefault, externalTarget, cancerStudyIdentifier, customMetaData, resourceId
         UNION ALL
         SELECT
         <include refid="selectPatientResourceCounts"/>
         <include refid="fromResourcePatient"/>
-        GROUP BY displayName, description, resourceType, priority, openByDefault, cancerStudyIdentifier, customMetaData, resourceId
+        GROUP BY displayName, description, resourceType, priority, openByDefault, externalTarget, cancerStudyIdentifier, customMetaData, resourceId
         ORDER BY resourceId
     </select>
 
@@ -243,7 +244,7 @@
                 </foreach>
             </if>
         </where>
-        GROUP BY displayName, description, resourceType, priority, openByDefault, cancerStudyIdentifier, customMetaData, resourceId
+        GROUP BY displayName, description, resourceType, priority, openByDefault, externalTarget, cancerStudyIdentifier, customMetaData, resourceId
         UNION ALL
         SELECT
         <include refid="selectPatientResourceCounts"/>
@@ -256,7 +257,7 @@
                 </foreach>
             </if>
         </where>
-        GROUP BY displayName, description, resourceType, priority, openByDefault, cancerStudyIdentifier, customMetaData, resourceId
+        GROUP BY displayName, description, resourceType, priority, openByDefault, externalTarget, cancerStudyIdentifier, customMetaData, resourceId
         ORDER BY resourceId
     </select>
 

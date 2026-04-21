@@ -1087,3 +1087,7 @@ UPDATE `info` SET `DB_SCHEMA_VERSION`="2.14.4";
 ##version: 2.14.5
 ALTER TABLE `info` ADD COLUMN `GENE_TABLE_VERSION` varchar(24);
 UPDATE `info` SET `DB_SCHEMA_VERSION`="2.14.5";
+
+##version: 2.14.6
+ALTER TABLE `resource_definition` ADD COLUMN `EXTERNAL_TARGET` varchar(255);
+UPDATE `info` SET `DB_SCHEMA_VERSION`="2.14.6";

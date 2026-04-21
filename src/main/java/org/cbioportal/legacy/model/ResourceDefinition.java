@@ -13,6 +13,7 @@ public class ResourceDefinition implements Serializable {
   private Boolean openByDefault;
   @NotNull private String cancerStudyIdentifier;
   private String customMetaData;
+  private String externalTarget;
 
   public String getResourceId() {
     return resourceId;
@@ -60,6 +61,14 @@ public class ResourceDefinition implements Serializable {
 
   public void setOpenByDefault(Boolean openByDefault) {
     this.openByDefault = openByDefault;
+  }
+  
+  public String getExternalTarget() {
+    return this.externalTarget;
+  }
+  
+  public void setExternalTarget(String externalTarget) {
+    this.externalTarget = externalTarget;  
   }
 
   public String getCancerStudyIdentifier() {

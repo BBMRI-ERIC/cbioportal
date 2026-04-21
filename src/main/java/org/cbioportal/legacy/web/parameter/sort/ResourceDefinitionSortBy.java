@@ -7,6 +7,7 @@ public enum ResourceDefinitionSortBy {
   resourceType("resourceType"),
   priority("priority"),
   openByDefault("openByDefault"),
+  externalTarget("externalTarget"),  
   studyId("cancerStudyIdentifier"),
   customMetaData("customMetaData");
 

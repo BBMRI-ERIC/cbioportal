@@ -75,6 +75,7 @@ public class ResourceDataMyBatisRepositoryTest {
     Assert.assertEquals(true, resourceDefinition.getOpenByDefault());
     Assert.assertEquals("1", resourceDefinition.getPriority());
     Assert.assertEquals("study_tcga_pub", resourceDefinition.getCancerStudyIdentifier());
+    Assert.assertEquals("my-window", resourceDefinition.getExternalTarget());
   }
 
   @Test
@@ -126,6 +127,7 @@ public class ResourceDataMyBatisRepositoryTest {
     Assert.assertEquals(true, resourceDefinition.getOpenByDefault());
     Assert.assertEquals("1", resourceDefinition.getPriority());
     Assert.assertEquals("study_tcga_pub", resourceDefinition.getCancerStudyIdentifier());
+    Assert.assertEquals("my-window", resourceDefinition.getExternalTarget());
   }
 
   @Test

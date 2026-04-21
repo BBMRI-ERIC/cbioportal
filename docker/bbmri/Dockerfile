@@ -20,7 +20,11 @@ WORKDIR /frontend-src
 COPY --from=frontend-build /frontend /frontend-src
 
 # Only keep this if the frontend repo actually contains a valid Maven packaging setup
-RUN mvn install -DskipTests -Dgpg.skip=true
+RUN FRONTEND_GROUP_ID="$(mvn -q -DforceStdout help:evaluate -Dexpression=project.groupId)" && \
+    FRONTEND_VERSION="$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version)" && \
+    echo "$FRONTEND_GROUP_ID" > /tmp/frontend.groupId && \
+    echo "$FRONTEND_VERSION" > /tmp/frontend.version && \
+    mvn install -DskipTests -Dgpg.skip=true
 
 
 FROM maven:3-eclipse-temurin-21 AS build
@@ -33,15 +37,19 @@ RUN mvn dependency:go-offline --fail-never
 COPY . /cbioportal
 
 COPY --from=frontend-maven /root/.m2 /root/.m2
+COPY --from=frontend-maven /tmp/frontend.groupId /tmp/frontend.groupId
+COPY --from=frontend-maven /tmp/frontend.version /tmp/frontend.version
 
 ARG FRONTEND_GROUP_ID=io.github.cbioportal
 ARG FRONTEND_VERSION=local
 
-RUN echo "FRONTEND_GROUP_ID=$FRONTEND_GROUP_ID" && \
+RUN FRONTEND_GROUP_ID="$(cat /tmp/frontend.groupId)" && \
+    FRONTEND_VERSION="$(cat /tmp/frontend.version)" && \
+    echo "FRONTEND_GROUP_ID=$FRONTEND_GROUP_ID" && \
     echo "FRONTEND_VERSION=$FRONTEND_VERSION" && \
     mvn clean package -DskipTests -Dspotless.check.skip=true \
-      -Dfrontend.version=${FRONTEND_VERSION} \
-      -Dfrontend.groupId=${FRONTEND_GROUP_ID} -q
+      -Dfrontend.groupId="${FRONTEND_GROUP_ID}" \
+      -Dfrontend.version="${FRONTEND_VERSION}" -q
 
 RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*-exec.jar)
 
